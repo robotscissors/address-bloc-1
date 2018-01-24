@@ -1,6 +1,6 @@
 require_relative 'entry'
 require 'csv'
-require 'bloc_record/base'
+# require 'bloc_record/base'
 
 class AddressBook < BlocRecord::Base
   attr_reader :entries
