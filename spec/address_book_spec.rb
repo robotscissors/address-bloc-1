@@ -1,140 +1,50 @@
 require_relative '../models/address_book'
+require_relative '../models/entry'
+require 'bloc_record'
+
+
+BlocRecord.connect_to('db/address_bloc.sqlite')
+#book = AddressBook.create(name: 'My Address Book')
 
 RSpec.describe AddressBook do
-  let(:book) { AddressBook.new }
+   #let(:book) {AddressBook.create(name: 'My Address Book')}
+   #let(:entry) {Entry.create(address_book_id: book.id, name: 'Foo One', phone_number: '999-999-9999', email: 'foo_one@gmail.com' )}
+   #let(:entry2) {Entry.create(address_book_id: book.id, name: 'Christopher', phone_number: '333-333-3333', email: 'cjbazin@gmail.com' )}
 
-  # #6
-  def check_entry(entry, expected_name, expected_number, expected_email)
-    expect(entry.name).to eq expected_name
-    expect(entry.phone_number).to eq expected_number
-    expect(entry.email).to eq expected_email
-  end
 
   describe "attributes" do
-    it "responds to entries" do
-      expect(book).to respond_to(:entries)
+    it "returns an array like an ORM" do
+      expect(Entry.all).to be_an(Array)
     end
 
-    it "initializes entries as an array" do
-      expect(book.entries).to be_an(Array)
+    it "responds to first element with chaining" do
+      expect(Entry.first.phone_number).to eq('999-999-9999')
     end
 
-    it "initializes entries as empty" do
-      expect(book.entries.size).to eq(0)
+    it "Responds to find(id)" do
+      expect(Entry.find(1).name).to eq('Foo One')
+    end
+   end
+
+  describe "error checking in methods" do
+    it "responds and fails gracefully to bad ids" do
+      # expect(Entry.find_one(-1)).to output("some output").to_stdout
+      expect {Entry.find(-1)}.to output("Invalid ID - ID must be greater than or equal to zero\n").to_stdout
+    end
+    it "responds to errors when strings are sent instead of numbers" do
+      expect {Entry.take("a")}.to output("Invalid value - this must contain a number\n").to_stdout
     end
   end
 
-  describe "#add_entry" do
-    it "adds only one entry to the address book" do
-      book.add_entry('Ada Lovelace', '010.012.1815', 'augusta.king@lovelace.com')
-
-      expect(book.entries.size).to eq(1)
+  describe "method_missing" do
+    it "responds to find_by_name" do
+      #puts "#{Entry.find_by_name('Christopher')}"
+      expect(Entry.find_by_name('Christopher').phone_number).to eq("232-203-2233")
     end
-
-    it "adds the correct information to entries" do
-      book.add_entry('Ada Lovelace', '010.012.1815', 'augusta.king@lovelace.com')
-      new_entry = book.entries[0]
-
-      expect(new_entry.name).to eq('Ada Lovelace')
-      expect(new_entry.phone_number).to eq('010.012.1815')
-      expect(new_entry.email).to eq('augusta.king@lovelace.com')
+    it "responds to phone" do
+      #puts "#{Entry.find_by_name('Christopher')}"
+      expect(Entry.find_by_phone('232-203-2233').name).to eq("Christopher")
     end
   end
 
-  # Test that AddressBook's .import_from_csv() method is working as expected
-  describe "#import_from_csv" do
-    it "imports the correct number of entries" do
-      book.import_from_csv("entries.csv")
-      book_size = book.entries.size
-
-      # Check the size of the entries in AddressBook
-      expect(book_size).to eq 5
-    end
-
-    it "imports the 1st entry" do
-      book.import_from_csv("entries.csv")
-      # Check the first entry
-      entry_one = book.entries[0]
-      check_entry(entry_one, "Bill", "555-555-4854", "bill@blocmail.com")
-    end
-
-    it "imports the 2nd entry" do
-      book.import_from_csv("entries.csv")
-      # Check the second entry
-      entry_two = book.entries[1]
-      check_entry(entry_two, "Bob", "555-555-5415", "bob@blocmail.com")
-    end
- 
-    it "imports the 3rd entry" do
-      book.import_from_csv("entries.csv")
-      # Check the third entry
-      entry_three = book.entries[2]
-      check_entry(entry_three, "Joe", "555-555-3660", "joe@blocmail.com")
-    end
- 
-    it "imports the 4th entry" do
-      book.import_from_csv("entries.csv")
-      # Check the fourth entry
-      entry_four = book.entries[3]
-      check_entry(entry_four, "Sally", "555-555-4646", "sally@blocmail.com")
-    end
- 
-    it "imports the 5th entry" do
-      book.import_from_csv("entries.csv")
-      # Check the fifth entry
-      entry_five = book.entries[4]
-      check_entry(entry_five, "Sussie", "555-555-2036", "sussie@blocmail.com")
-    end
-  end
-
-  # Test the binary_search method
-  describe "#binary_search" do
-    it "searches AddressBook for a non-existent entry" do
-      book.import_from_csv("entries.csv")
-      entry = book.binary_search("Dan")
-      expect(entry).to be_nil
-    end
-
-    it "searches AddressBook for Bill" do
-      book.import_from_csv("entries.csv")
-      entry = book.binary_search("Bill")
-      expect(entry).to be_a Entry
-      check_entry(entry, "Bill", "555-555-4854", "bill@blocmail.com")
-    end
-
-    it "searches AddressBook for Bob" do
-      book.import_from_csv("entries.csv")
-      entry = book.binary_search("Bob")
-      expect(entry).to be_a Entry
-      check_entry(entry, "Bob", "555-555-5415", "bob@blocmail.com")
-    end
-
-    it "searches AddressBook for Joe" do
-      book.import_from_csv("entries.csv")
-      entry = book.binary_search("Joe")
-      expect(entry).to be_a Entry
-      check_entry(entry, "Joe", "555-555-3660", "joe@blocmail.com")
-    end
-
-    it "searches AddressBook for Sally" do
-      book.import_from_csv("entries.csv")
-      entry = book.binary_search("Sally")
-      expect(entry).to be_a Entry
-      check_entry(entry, "Sally", "555-555-4646", "sally@blocmail.com")
-    end
-
-    it "searches AddressBook for Sussie" do
-      book.import_from_csv("entries.csv")
-      entry = book.binary_search("Sussie")
-      expect(entry).to be_a Entry
-      check_entry(entry, "Sussie", "555-555-2036", "sussie@blocmail.com")
-    end
-
-    it "searches AddressBook for Billy" do
-      book.import_from_csv("entries.csv")
-      entry = book.binary_search("Billy")
-      expect(entry).to be_nil
-    end
-  end
 end
-
