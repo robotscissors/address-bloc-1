@@ -47,4 +47,63 @@ RSpec.describe AddressBook do
     end
   end
 
+  describe "Check update function" do
+    #reset
+    Entry.update(1, name: 'Foo One')
+    Entry.update(2, name: 'Foo Two')
+
+    it "updates entry 1 name to BBAAZZIINN" do
+      Entry.update(1, name: 'BBAAZZIINN')
+      expect(Entry.find(1).name).to eq('BBAAZZIINN')
+    end
+    it "updates multiple ids with multiple items" do
+      people = { 1 => { "name" => "David" }, 2 => { "name" => "Jeremy" } }
+      Entry.update(people.keys, people.values)
+      expect(Entry.find(1).name).to eq('David')
+      expect(Entry.find(2).name).to eq('Jeremy')
+    end
+
+  end
+
+  describe "Missing method - update", focus: true do
+    #reset
+    Entry.update(1, name: 'Foo One')
+    Entry.update(2, name: 'Foo Two')
+    person = Entry.find(1)
+
+    it "updates entry 1 name to CCHHRRIISS" do
+      person.update_attribute(:name, "CCHHRRIISS")
+      person = Entry.find(1)
+      expect(person.name).to eq('CCHHRRIISS')
+    end
+  end
+
+  describe "Where collection methods" do
+    #reset
+    Entry.update(1, name: 'Foo One')
+    Entry.update(2, name: 'Foo Two')
+
+    it "Select where first name is Foo One" do
+      person = Entry.where(name: "Foo One").take
+      expect(person[0].name).to eq('Foo One')
+    end
+    it "Select where uses double where" do
+      person = Entry.where(Email: "foo_one@gmail.com").where(name: "CCHHRRIISS")
+      puts "#{person}"
+      expect(person[0].name).to eq('CCHHRRIISS')
+    end
+
+    it "Select items using NOT" do
+      person = Entry.where.not(Email: "foo_one@gmail.com")
+    end
+
+  end
+
+  describe "Delete collection methods" do
+    it "deletes only those apart of the collection" do
+      Entry.where(name: 'Foo One').destroy_all
+    end
+  end
+
+
 end
